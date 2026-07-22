@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>AmaninDulu - Hybrid Cash System</title>
+  <meta name="description" content="Pencatatan kas multi-akun untuk toko & pribadi.">
+  <meta name="theme-color" content="#FF2E16">
+
+  <!-- PWA -->
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" href="./icon-192.png">
+  <link rel="apple-touch-icon" href="./icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="AmaninDulu">
+
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: #0C0C0C;
+    }
+
+    #app-frame {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+    #app-frame.loaded { opacity: 1; }
+
+    #loading-screen {
+      position: fixed;
+      inset: 0;
+      background: #0C0C0C;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      transition: opacity 0.4s ease;
+    }
+    #loading-screen.hide {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .logo-mark {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 20px;
+    }
+    .logo-bar {
+      width: 52px;
+      height: 22px;
+      background: #FF2E16;
+      animation: pulse 1.2s ease-in-out infinite;
+    }
+    .logo-bar:nth-child(2) { animation-delay: 0.2s; }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.35; }
+    }
+    #loading-screen h1 {
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 20px;
+      letter-spacing: -0.5px;
+      text-transform: uppercase;
+    }
+    #loading-screen p {
+      color: #94a3b8;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-top: 8px;
+    }
+
+    #error-screen {
+      position: fixed;
+      inset: 0;
+      background: #F6F6F6;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px;
+      z-index: 11;
+    }
+    #error-screen.show { display: flex; }
+    #error-screen h2 {
+      font-weight: 800;
+      text-transform: uppercase;
+      color: #0C0C0C;
+      margin-bottom: 8px;
+      font-size: 16px;
+      letter-spacing: -0.3px;
+    }
+    #error-screen p {
+      color: #64748b;
+      font-size: 13px;
+      margin-bottom: 20px;
+      max-width: 320px;
+      line-height: 1.5;
+    }
+    #error-screen a {
+      background: #FF2E16;
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      text-decoration: none;
+      padding: 12px 28px;
+      border: 2px solid #0C0C0C;
+      box-shadow: 3px 3px 0px 0px #0C0C0C;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="loading-screen">
+    <div class="logo-mark">
+      <div class="logo-bar"></div>
+      <div class="logo-bar"></div>
+    </div>
+    <h1>AmaninDulu</h1>
+    <p>Memuat aplikasi...</p>
+  </div>
+
+  <div id="error-screen">
+    <h2>Gagal Memuat Aplikasi</h2>
+    <p>Sepertinya koneksi lambat atau aplikasi sedang bermasalah. Coba buka langsung lewat tombol di bawah.</p>
+    <a id="direct-link" href="#" target="_blank" rel="noopener">Buka Langsung</a>
+  </div>
+
+  <iframe id="app-frame" title="AmaninDulu"></iframe>
+
+  <script>
+    // ============================================================================
+    // WAJIB DIISI: ganti dengan URL /exec deployment Apps Script Anda yang AKTIF.
+    // Cara ambil: buka Apps Script Editor -> Deploy -> Manage deployments -> copy
+    // URL Web app (yang berakhiran /exec). Kalau Anda re-deploy dan URL-nya berubah,
+    // update juga nilai ini + jalankan ulang setupTelegramWebhookWithUrl() di code.gs.
+    // ============================================================================
+    const APP_URL = 'GANTI_DENGAN_URL_APPS_SCRIPT_ANDA';
+
+    const frame = document.getElementById('app-frame');
+    const loadingScreen = document.getElementById('loading-screen');
+    const errorScreen = document.getElementById('error-screen');
+    document.getElementById('direct-link').href = APP_URL;
+
+    let loaded = false;
+
+    frame.addEventListener('load', function() {
+      loaded = true;
+      loadingScreen.classList.add('hide');
+      frame.classList.add('loaded');
+    });
+
+    frame.src = APP_URL;
+
+    // Kalau dalam 15 detik belum juga selesai load, tampilkan fallback (bukan diam saja)
+    setTimeout(function() {
+      if (!loaded) {
+        loadingScreen.classList.add('hide');
+        errorScreen.classList.add('show');
+      }
+    }, 15000);
+
+    // Daftarkan service worker (syarat teknis biar bisa "Add to Home Screen" / diinstal)
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('./sw.js').catch(function(err) {
+          console.log('Service worker gagal daftar:', err);
+        });
+      });
+    }
+  </script>
+</body>
+</html>
