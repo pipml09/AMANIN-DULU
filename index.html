@@ -53,22 +53,18 @@
       pointer-events: none;
     }
     .logo-mark {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      margin-bottom: 20px;
-    }
-    .logo-bar {
-      width: 52px;
-      height: 22px;
-      background: #FF2E16;
-      animation: pulse 1.2s ease-in-out infinite;
-    }
-    .logo-bar:nth-child(2) { animation-delay: 0.2s; }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.35; }
-    }
+  margin-bottom: 20px;
+  animation: pulse 1.4s ease-in-out infinite;
+}
+.logo-mark img {
+  width: 88px;
+  height: 88px;
+  display: block;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(0.96); }
+}
     #loading-screen h1 {
       color: #ffffff;
       font-weight: 800;
@@ -130,10 +126,9 @@
 <body>
 
   <div id="loading-screen">
-    <div class="logo-mark">
-      <div class="logo-bar"></div>
-      <div class="logo-bar"></div>
-    </div>
+  <div class="logo-mark">
+  <img src="./icon-192.png" alt="AmaninDulu">
+</div>
     <h1>AmaninDulu</h1>
     <p>Memuat aplikasi...</p>
   </div>
